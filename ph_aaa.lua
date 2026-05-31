@@ -6,12 +6,13 @@ PH.AAAGroup.__index = PH.AAAGroup
 PH.AAAGroup.MESSAGES_ENABLED = false
 PH.AAAGroup.MIN_SUPPRESSION_SECONDS = 60
 PH.AAAGroup.MAX_SUPPRESSION_SECONDS = 180
+PH.AAAGroup.ENABLED_BY_DEFAULT = true
 
 function PH.AAAGroup:new(group)
   local instance = setmetatable({}, PH.AAAGroup)
 
   instance.group = group
-  instance.isEnabled = true
+  instance.isEnabled = PH.AAAGroup.ENABLED_BY_DEFAULT
   instance.timerID = false
   instance.damageHandler = {}
 
@@ -28,6 +29,12 @@ function PH.AAAGroup:new(group)
   end
 
   world.addEventHandler(instance.damageHandler)
+
+  if instance.isEnabled then
+    instance:setAutoState()
+  else
+    instance:setGreenState()
+  end
 
   return instance
 end
@@ -61,10 +68,13 @@ end
 function PH.AAAGroup:resume()
   if Group.isExist(self.group) then
     self.timerID = false
-    self:setAutoState()
 
-    if PH.AAAGroup.MESSAGES_ENABLED then
-      trigger.action.outText(self.group:getName() .. " has re-engaged!", 5)
+    if self.isEnabled then
+      self:setAutoState()
+
+      if PH.AAAGroup.MESSAGES_ENABLED then
+        trigger.action.outText(self.group:getName() .. " has re-engaged!", 5)
+      end
     end
   end
 end
